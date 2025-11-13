@@ -1,26 +1,29 @@
 package net.alexf1789.jhasher;
 
+import java.io.File;
+import java.net.URL;
+
+import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
-import javafx.event.Event;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-
 public class MainApplication extends Application {
+
+    private static final int PREF_WIDTH = 600;
 
     public static void main(String[] args) {
         launch(args);
@@ -28,7 +31,16 @@ public class MainApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         stage.setTitle("JHasher");
+
+        // let's add the icon
+        URL url = getClass().getResource("/GPG-Key4.png");
+
+        if(url != null)
+            stage.getIcons().add(new Image(url.toExternalForm()));
+        else
+            System.err.println("An error occurred loading the icon...");
 
         // base idea -> grid with:
         // file selector (all line)
@@ -39,7 +51,15 @@ public class MainApplication extends Application {
         // text field(sha512)
         // gap
         // button 1 - button2
+        
+        String[] hashDescriptions = {
+                "SHA1",
+                "SHA256",
+                "SHA512"
+        };
+
         GridPane root = new GridPane();
+        root.setPrefWidth(PREF_WIDTH);
 
         FileChooser inputFile = new FileChooser();
         inputFile.setTitle("Choose a file...");
@@ -50,6 +70,7 @@ public class MainApplication extends Application {
         TextField verify = new TextField();
 
         inputText.setPromptText("Text to hash...");
+        inputText.setPrefWidth(PREF_WIDTH);
 
         inputFileName.setPromptText("File to hash...");
 
@@ -87,11 +108,14 @@ public class MainApplication extends Application {
                 for(int i=0; i<computedHash.length; i++) {
                     if(verify.getText().equals(computedHash[i])) {
                         verify.setBackground(Background.fill(Color.LIGHTGREEN));
+                        hash[i].setBackground(Background.fill(Color.LIGHTGREEN));
+                        new Alert(AlertType.CONFIRMATION, "The hash you inserted matches the %s hash calculated!".formatted(hashDescriptions[i])).show();
                         return;
                     }
                 }
 
                 verify.setBackground(Background.fill(Color.LIGHTCORAL));
+                new Alert(Alert.AlertType.ERROR, "The inserted hash doesn't match with the calculated!").show();
             }
         });
 
@@ -110,11 +134,13 @@ public class MainApplication extends Application {
                 for(int i=0; i<computedHash.length; i++) {
                     if(verify.getText().equals(computedHash[i])) {
                         verify.setBackground(Background.fill(Color.LIGHTGREEN));
+                        verify.setBackground(Background.fill(Color.LIGHTGREEN));
                         return;
                     }
                 }
 
                 verify.setBackground(Background.fill(Color.LIGHTCORAL));
+                new Alert(Alert.AlertType.ERROR, "The inserted hash doesn't match with the calculated!").show();
             }
         });
 
@@ -127,18 +153,15 @@ public class MainApplication extends Application {
             }
 
             verify.setText("");
-            verify.setBackground(Background.fill(Color.WHITE));
+            verify.setBackground(inputText.getBackground());
+
+            for(TextField tf : hash)
+                tf.setBackground(inputText.getBackground());
         });
 
         ButtonBar buttonBar = new ButtonBar();
         buttonBar.getButtons().addAll(calculateText, calculateFile, reset);
         buttonBar.setButtonOrder("U+");
-
-        String[] hashDescriptions = {
-                "SHA1",
-                "SHA256",
-                "SHA512"
-        };
 
         root.setPadding(new Insets(15));
         root.setHgap(5);
@@ -173,7 +196,7 @@ public class MainApplication extends Application {
         root.add(buttonBar, 0, currentTableRow);
 
         stage.setScene(new Scene(root));
-        stage.setResizable(false);
+        //stage.setResizable(false);
         stage.show();
     }
 
