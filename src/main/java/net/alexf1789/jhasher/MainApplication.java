@@ -3,7 +3,6 @@ package net.alexf1789.jhasher;
 import java.io.File;
 import java.net.URL;
 
-import atlantafx.base.theme.PrimerLight;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -16,6 +15,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -31,7 +32,6 @@ public class MainApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         stage.setTitle("JHasher");
 
         // let's add the icon
@@ -76,7 +76,7 @@ public class MainApplication extends Application {
 
         verify.setPromptText("Verify hash");
 
-        inputFileName.setOnMouseClicked((_) -> {
+        inputFileName.setOnMouseClicked((event) -> {
             File file = inputFile.showOpenDialog(stage);
 
             if(file != null && file.isFile())
@@ -93,58 +93,61 @@ public class MainApplication extends Application {
         Button calculateFile = new Button("File");
         Button reset = new Button("Reset");
 
-        calculateText.setOnMouseClicked((_) -> {
-            if(inputText.getText().isBlank() || inputText.getText().isEmpty()) {
+        calculateText.setOnMouseClicked((event) -> {
+            if(inputText.getText().isEmpty()) {
                 new Alert(Alert.AlertType.ERROR, "Insert a text to calculate its hash!").show();
                 return;
             }
 
             String[] computedHash = new TextHasher(inputText.getText()).getHash();
             for(int i=0; i<computedHash.length; i++) {
+            	hash[i].setBackground(inputText.getBackground());
                 hash[i].setText(computedHash[i]);
             }
 
-            if(!(verify.getText().isBlank() && verify.getText().isEmpty())) {
+            if(!(verify.getText().isEmpty())) {
                 for(int i=0; i<computedHash.length; i++) {
                     if(verify.getText().equals(computedHash[i])) {
-                        verify.setBackground(Background.fill(Color.LIGHTGREEN));
-                        hash[i].setBackground(Background.fill(Color.LIGHTGREEN));
-                        new Alert(AlertType.CONFIRMATION, "The hash you inserted matches the %s hash calculated!".formatted(hashDescriptions[i])).show();
+                        verify.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                        hash[i].setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                        new Alert(AlertType.CONFIRMATION, "The hash you inserted matches the "+hashDescriptions[i]+" hash calculated!").show();
                         return;
                     }
                 }
 
-                verify.setBackground(Background.fill(Color.LIGHTCORAL));
+                verify.setBackground(new Background(new BackgroundFill(Color.LIGHTCORAL, CornerRadii.EMPTY, Insets.EMPTY)));
                 new Alert(Alert.AlertType.ERROR, "The inserted hash doesn't match with the calculated!").show();
             }
         });
 
-        calculateFile.setOnMouseClicked((_) -> {
-            if(inputFileName.getText().isBlank() || inputFileName.getText().isEmpty()) {
+        calculateFile.setOnMouseClicked((event) -> {
+            if(inputFileName.getText().isEmpty()) {
                 new Alert(Alert.AlertType.ERROR, "Select a file to calculate its hash!").show();
                 return;
             }
 
             String[] computedHash = new FileHasher(new File(inputFileName.getText())).getHash();
             for(int i=0; i<computedHash.length; i++) {
+            	hash[i].setBackground(inputText.getBackground());
                 hash[i].setText(computedHash[i]);
             }
 
-            if(!(verify.getText().isBlank() && verify.getText().isEmpty())) {
+            if(!(verify.getText().isEmpty())) {
                 for(int i=0; i<computedHash.length; i++) {
                     if(verify.getText().equals(computedHash[i])) {
-                        verify.setBackground(Background.fill(Color.LIGHTGREEN));
-                        verify.setBackground(Background.fill(Color.LIGHTGREEN));
+                        verify.setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                        hash[i].setBackground(new Background(new BackgroundFill(Color.LIGHTGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+                        new Alert(AlertType.CONFIRMATION, "The hash you inserted matches the "+hashDescriptions[i]+" hash calculated!").show();
                         return;
                     }
                 }
 
-                verify.setBackground(Background.fill(Color.LIGHTCORAL));
+                verify.setBackground(new Background(new BackgroundFill(Color.LIGHTCORAL, CornerRadii.EMPTY, Insets.EMPTY)));
                 new Alert(Alert.AlertType.ERROR, "The inserted hash doesn't match with the calculated!").show();
             }
         });
 
-        reset.setOnAction((_) -> {
+        reset.setOnAction((event) -> {
             inputText.setText("");
             inputFileName.setText("");
 
@@ -196,7 +199,7 @@ public class MainApplication extends Application {
         root.add(buttonBar, 0, currentTableRow);
 
         stage.setScene(new Scene(root));
-        //stage.setResizable(false);
+        stage.setResizable(false);
         stage.show();
     }
 
